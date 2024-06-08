@@ -19,9 +19,9 @@ def test_pick_last(size):
 
 
 def test_pick_random(size):
-    index1 = next.pick(size, None)
-    index2 = next.pick(size, None)
-    assert 0 <= index1 < size and 0 <= index2 < size and index1 != index2
+    random1 = next.pick(size, None)
+    random2 = next.pick(size, None)
+    assert 0 <= random1 < size and 0 <= random2 < size and random1 != random2
 
 
 def test_pick_second():
@@ -35,6 +35,6 @@ def test_pick_second_last():
 
 
 def test_pick_zero(size):
-    index1 = next.pick(size, 0)
-    index2 = next.pick(size, 0)
-    assert 0 <= index1 < size and 0 <= index2 < size and index1 != index2
+    random1 = next.pick(size, 0)
+    random2 = next.pick(size, 0)
+    assert 0 <= random1 < size and 0 <= random2 < size and random1 != random2
