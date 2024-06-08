@@ -46,40 +46,52 @@ def pick(size: int, choice: int) -> int:
     return index
 
 
+def scrape(url, proxy, regexp):
+    """
+    Scrape the url to find links matching the pattern specified by a regular expression.
+    :param url: The url to scrape.
+    :param proxy: A web proxy to use.
+    :param regexp: A regular expression to match any found links with.
+    :return: A ResultSet of matching PageElements.
+    """
+    if proxy:
+        proxies = {
+            'http': proxy,
+            'https': proxy
+        }
+    else:
+        proxies = None
+
+    if regexp:
+        pattern = re.compile(regexp)
+    else:
+        pattern = True
+
+    resp = requests.get(url, proxies=proxies)
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    rs = soup.find_all('a', href=pattern)
+    resp.close()
+
+    return rs
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A tool to scrape websites for the next link")
     parser.add_argument("url", help="the http url to scrape")
     parser.add_argument("-x", "--proxy", help="the proxy to use")
-    parser.add_argument("-e", "--regexp", help="the regular expression to match")
-    parser.add_argument("-s", "--select", type=int, help="the link to select")
+    parser.add_argument("-e", "--regexp", help="the regular expression to match links with")
+    parser.add_argument("-s", "--select", type=int, help="the link to select from the matches")
     args = parser.parse_args()
 
     parsed_uri = urlparse(args.url)
     base_uri = f'{parsed_uri.scheme}://{parsed_uri.netloc}'
 
-    if args.proxy:
-        proxies = {
-            'http': args.proxy,
-            'https': args.proxy
-        }
-    else:
-        proxies = None
+    rs = scrape(args.url, args.proxy, args.regexp)
+    size = len(rs)
 
-    if args.regexp:
-        pattern = re.compile(args.regexp)
-    else:
-        pattern = True
-
-    resp = requests.get(args.url, proxies=proxies)
-    soup = BeautifulSoup(resp.text, "html.parser")
-
-    r = soup.find_all('a', href=pattern)
-    size = len(r)
-
-    if (size > 0):
+    if size > 0:
         i = pick(size, args.select)
-        print(full_link(base_uri, r[i]['href']))
+        print(full_link(base_uri, rs[i]['href']))
     else:
         print("No link found!", file=sys.stderr)
-
-    resp.close()
